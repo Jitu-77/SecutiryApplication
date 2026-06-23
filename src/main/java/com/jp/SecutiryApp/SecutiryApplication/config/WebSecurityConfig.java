@@ -1,8 +1,11 @@
 package com.jp.SecutiryApp.SecutiryApplication.config;
 
+import com.jp.SecutiryApp.SecutiryApplication.filter.JwtAuthFilters;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,10 +18,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
+
+    private final JwtAuthFilters jwtAuthFilters;
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
@@ -28,7 +36,7 @@ public class WebSecurityConfig {
                         // NO RESTRICTION
                         .requestMatchers("/posts","/auth/**").permitAll()
                         //restricted to ADMIN ROLE
-                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
+//                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
 
                         .anyRequest().authenticated()
                         )
@@ -36,7 +44,9 @@ public class WebSecurityConfig {
                 .csrf(csrfConfig -> csrfConfig.disable())
 
                 .sessionManagement(sessionConfig -> sessionConfig
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // registering the  custom filter
+                .addFilterBefore(jwtAuthFilters, UsernamePasswordAuthenticationFilter.class);
                     //we can disable the form based login by commenting this one
 //                 .formLogin(Customizer.withDefaults());
 
@@ -67,9 +77,11 @@ public class WebSecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // removing the passwordEncoder from here as it creates circular dependency between jwtAuthFilter and User Service
+    // so moving this to app config
+//    @Bean
+//    PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
 
 }
