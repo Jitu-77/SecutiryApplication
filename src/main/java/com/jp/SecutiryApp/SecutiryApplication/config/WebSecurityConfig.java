@@ -1,10 +1,12 @@
 package com.jp.SecutiryApp.SecutiryApplication.config;
 
+import com.jp.SecutiryApp.SecutiryApplication.enums.Role;
 import com.jp.SecutiryApp.SecutiryApplication.filter.JwtAuthFilters;
 import com.jp.SecutiryApp.SecutiryApplication.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
@@ -21,6 +23,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.net.http.HttpRequest;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -28,7 +32,9 @@ public class WebSecurityConfig {
 
     private final JwtAuthFilters jwtAuthFilters;
     private final OAuth2SuccessHandler successHandler;
-
+    private static final String[] publicRoutes ={
+            "/error", "/auth/**","/home.html"
+    };
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
@@ -36,7 +42,17 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // NO RESTRICTION
-                        .requestMatchers("/posts", "/error", "/auth/**","/home.html").permitAll()
+//                        .requestMatchers("/posts", "/error", "/auth/**","/home.html").permitAll()
+                        .requestMatchers(publicRoutes).permitAll()
+
+                        //now implementing role based
+//                                .requestMatchers("/posts/**").hasRole(Role.ADMIN.name())
+
+                        //partial authorization on same route
+                        .requestMatchers(HttpMethod.GET,"/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/posts/**").hasAnyRole(Role.ADMIN.name(),Role.CREATOR.name())
+
+
                         //restricted to ADMIN ROLE
 //                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
 

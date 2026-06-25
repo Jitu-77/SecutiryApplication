@@ -48,7 +48,9 @@ public class JwtAuthFilters  extends OncePerRequestFilter {
                 //now got the user and userID
                 // now make the authentication
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(user, null, null);
+                        //without roles
+//                        new UsernamePasswordAuthenticationToken(user, null, null);
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 //capturing the details of the user request for eg , ip address
                 usernamePasswordAuthenticationToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)

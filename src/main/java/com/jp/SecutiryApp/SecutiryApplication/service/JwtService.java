@@ -29,7 +29,8 @@ public class JwtService {
                 .subject(user.getId().toString())
                 //via claim we can pass values as key:value
                 .claim("email", user.getEmail())
-                .claim("roles", Set.of("ADMIN", "USER"))
+                //.claim("roles", Set.of("ADMIN", "USER")) // before role based
+                .claim("roles", user.getRoles().toString()) // before role based
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000*60*2))
                 .signWith(getSecretKey())
