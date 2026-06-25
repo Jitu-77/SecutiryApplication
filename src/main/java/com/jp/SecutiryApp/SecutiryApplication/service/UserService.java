@@ -31,6 +31,15 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(()-> new  BadCredentialsException("username not found with "+ username));
     }
 
+    public UserEntity loadUserByEmail(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElse(null);//we willnot throw error we will register this user from oauth -- first timer
+    }
+
+    public UserEntity save(UserEntity user){
+        return  userRepository.save(user);
+    }
+
     public UserDTO signUp(SignUpDTO signUpDTO){
         Optional<UserEntity> userEntity = userRepository.findByEmail(signUpDTO.getEmail());
         if(userEntity.isPresent()){

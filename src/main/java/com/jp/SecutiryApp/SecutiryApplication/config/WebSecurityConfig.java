@@ -1,6 +1,7 @@
 package com.jp.SecutiryApp.SecutiryApplication.config;
 
 import com.jp.SecutiryApp.SecutiryApplication.filter.JwtAuthFilters;
+import com.jp.SecutiryApp.SecutiryApplication.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final JwtAuthFilters jwtAuthFilters;
+    private final OAuth2SuccessHandler successHandler;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -34,7 +36,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // NO RESTRICTION
-                        .requestMatchers("/posts","/auth/**").permitAll()
+                        .requestMatchers("/posts", "/error", "/auth/**","/home.html").permitAll()
                         //restricted to ADMIN ROLE
 //                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
 
@@ -46,7 +48,15 @@ public class WebSecurityConfig {
                 .sessionManagement(sessionConfig -> sessionConfig
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // registering the  custom filter
-                .addFilterBefore(jwtAuthFilters, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilters, UsernamePasswordAuthenticationFilter.class)
+                // for oauth2 client
+                .oauth2Login(oauthConfigurer->
+                        oauthConfigurer
+                                .failureUrl("/login?error=true")
+                                .successHandler(successHandler)
+                );
+
+
                     //we can disable the form based login by commenting this one
 //                 .formLogin(Customizer.withDefaults());
 
