@@ -1,6 +1,7 @@
 package com.jp.SecutiryApp.SecutiryApplication.service;
 
 import com.jp.SecutiryApp.SecutiryApplication.dto.LoginDTO;
+import com.jp.SecutiryApp.SecutiryApplication.dto.LoginResponseDTO;
 import com.jp.SecutiryApp.SecutiryApplication.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
     private final JwtService  jwtService;
 
-    public String login(LoginDTO loginDTO){
+//    public String login(LoginDTO loginDTO){
+    public LoginResponseDTO login(LoginDTO loginDTO){
         //authenticating via authentication manager
         // it implements the authenticate method
         //which furthur implements UsernamePasswordAuthenticationToken
@@ -29,6 +32,20 @@ public class AuthService {
         UserEntity userEntity = (UserEntity) authentication.getPrincipal();
         // generate token
         String token = jwtService.generateToken(userEntity);
-        return token;
+        String refreshToken = jwtService.generateRefreshToken(userEntity);
+
+//        return token;
+
+        return new LoginResponseDTO(userEntity.getId(),token,refreshToken);
+    }
+
+
+    public LoginResponseDTO refreshToken(String refreshToken){
+        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        UserEntity user = userService.getUserById(userId);
+
+        String accessToken = jwtService.generateToken(user);
+        //we are not generating a refreshToken , if the refreshToken expired then the user must login
+        return new LoginResponseDTO(user.getId(),accessToken,refreshToken);
     }
 }
