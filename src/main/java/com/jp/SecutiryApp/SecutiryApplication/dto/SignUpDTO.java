@@ -1,5 +1,6 @@
 package com.jp.SecutiryApp.SecutiryApplication.dto;
 
+import com.jp.SecutiryApp.SecutiryApplication.enums.Permission;
 import com.jp.SecutiryApp.SecutiryApplication.enums.Role;
 import lombok.Data;
 import lombok.Getter;
@@ -14,4 +15,5 @@ public class SignUpDTO {
     private String password;
     private String name;
     private Set<Role> roles;
+    private Set<Permission> permissions;
 }

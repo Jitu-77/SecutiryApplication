@@ -1,5 +1,6 @@
 package com.jp.SecutiryApp.SecutiryApplication.config;
 
+import com.jp.SecutiryApp.SecutiryApplication.enums.Permission;
 import com.jp.SecutiryApp.SecutiryApplication.enums.Role;
 import com.jp.SecutiryApp.SecutiryApplication.filter.JwtAuthFilters;
 import com.jp.SecutiryApp.SecutiryApplication.handler.OAuth2SuccessHandler;
@@ -50,11 +51,22 @@ public class WebSecurityConfig {
 
                         //partial authorization on same route
                         .requestMatchers(HttpMethod.GET,"/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/posts/**").hasAnyRole(Role.ADMIN.name(),Role.CREATOR.name())
+                        .requestMatchers(HttpMethod.POST,"/posts/**")
+                                .hasAnyRole(Role.ADMIN.name(),Role.CREATOR.name())
 
 
                         //restricted to ADMIN ROLE
 //                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
+
+
+                        // adding manual permission for route
+                        .requestMatchers(HttpMethod.POST,"/posts/**")
+                        .hasAnyAuthority(Permission.POST_CREATE.name())
+                        .requestMatchers(HttpMethod.GET,"/posts/**")
+                        .hasAnyAuthority(Permission.POST_VIEW.name())
+                        .requestMatchers(HttpMethod.PUT,"/posts/**")
+                        .hasAnyAuthority(Permission.POST_UPDATE.name())
+
 
                         .anyRequest().authenticated()
                         )
